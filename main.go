@@ -36,8 +36,9 @@ type Server struct {
 	router    *http.ServeMux
 	initDelay time.Duration
 
-	mu      sync.RWMutex // protects the healthy variable
+	mu      sync.RWMutex // protects the healthy and ready variables
 	healthy bool
+	ready   bool
 }
 
 // NewServer returns an initialized k8s-hello server.
@@ -57,7 +58,7 @@ func NewServer(initDelay time.Duration) *Server {
 	go func() {
 		time.Sleep(initDelay)
 		s.mu.Lock()
-		s.healthy = true
+		s.ready = true
 		s.mu.Unlock()
 	}()
 
@@ -88,7 +89,7 @@ func (s *Server) HandleHealth() http.HandlerFunc {
 		s.mu.RLock()
 		defer s.mu.RUnlock()
 
-		if s.healthy {
+		if s.healthy && s.ready {
 			w.WriteHeader(200)
 		} else {
 			w.WriteHeader(500)
