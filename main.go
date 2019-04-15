@@ -90,9 +90,9 @@ func (s *Server) HandleHealth() http.HandlerFunc {
 		defer s.mu.RUnlock()
 
 		if s.healthy && s.ready {
-			w.WriteHeader(200)
+			w.WriteHeader(http.StatusOK)
 		} else {
-			w.WriteHeader(500)
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
 }
